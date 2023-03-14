@@ -45,9 +45,9 @@ public class OrderServiceTest {
         order.setUsername("잔고 부족");
 
         try {
-            service.order(order);
+            service.order(order); /** 비즈니스 처리 예외는 try-catch로 잡아서,  */
         } catch (NotEnoughMoneyException e) {
-            log.info("고객에게 잔고 부족 사실과 입금 계좌 번호 알림");
+            log.info("고객에게 잔고 부족 사실과 입금 계좌 번호 알림"); /** catch절에서 고객에게 다른 방식을 시도할 수 있도록 안내하는 등, 비즈니스 상황에 맞는 처리를 한다 */
         }
         assertThat(repository.findById(order.getId()).get().getPayStatus()).isEqualTo("대기");
     }
