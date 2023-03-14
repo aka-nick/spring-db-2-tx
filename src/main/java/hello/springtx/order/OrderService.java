@@ -18,6 +18,8 @@ public class OrderService {
         repository.save(order);
 
         log.info("결제 진입");
+
+        // 여러 상황을 위해서 사용자 이름에 따라 다른 상황이 벌어진다고 가정
         if (order.getUsername().equals("예외")) {
             log.info("시스템 예외 발생");
             throw new RuntimeException("시스템 예외");
@@ -31,6 +33,7 @@ public class OrderService {
             log.info("정상 승인");
             order.setPayStatus("완료");
         }
+
         log.info( "결제 프로세스 완료");
     }
 }
