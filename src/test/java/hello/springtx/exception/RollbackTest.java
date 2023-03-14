@@ -1,6 +1,7 @@
 package hello.springtx.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 예외 발생 시 트랜잭션 AOP는 예외 종류에 따라 트랜잭션을 커밋(체크)하거나 롤백(언체크)한다.
+ *
+ * 왜냐면,
+ * 체크 예외는 비즈니스적 의미가 있는 예외 / 언체크(런타임) 예외는 복구 불가능한 시스템 상의 예외라고 기본적으로 판단한다
+ * (물론 기본 전략일 뿐이고, 비즈니스에 따라 적절하게 판단해서 처리할 필요가 있다.)
  */
 @SpringBootTest
 @Slf4j
@@ -20,17 +25,20 @@ public class RollbackTest {
 
      @Test
      void runtime() {
-          service.runtimeException();
+          Assertions.assertThatThrownBy(() -> service.runtimeException())
+                  .isInstanceOf(RuntimeException.class);
      }
 
      @Test
      void checked() throws MyException {
-          service.checkedException();
+          Assertions.assertThatThrownBy(() -> service.checkedException())
+                  .isInstanceOf(MyException.class);
      }
 
      @Test
      void rollbackFor() throws MyException {
-          service.rollbackFor();
+          Assertions.assertThatThrownBy(() -> service.rollbackFor())
+                  .isInstanceOf(MyException.class);
      }
 
 
