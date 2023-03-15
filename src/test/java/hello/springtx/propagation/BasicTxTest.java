@@ -94,8 +94,44 @@ public class BasicTxTest {
         TransactionStatus s2 = txManager.getTransaction(new DefaultTransactionAttribute());
 
         log.info("트랜잭션2 롤백 시작");
-        txManager.commit(s2);
+        txManager.rollback(s2);
 
         log.info("트랜잭션2 롤백 완료");
+    }
+
+    // 트랜잭션 전파(스프링이 제공하는 트랜잭션 전파 기능)
+    /*
+    외부 트랜잭션이 수행 중인데, 내부 트랜잭션이 추가로 수행됨
+    - 하나의 트랜잭션이 끝나지 않았는데 또 다른 트랜잭션을 수행하면
+    - 스프링은 하나의 트랜잭션(이전에 만들어진 트랜잭션)에 뒤늦게 수행된 트랜잭션을 참여(하나의 커넥션풀 커넥션 객체로 수행)시켜서 하나로 수행시킨다.
+    - 이를 위해 필요한 개념은 물리트랜잭션/논리트랜잭션이다.
+        - 물리 트랜잭션은 실제 데이터베이스에 적용되는 트랜잭션을 뜻한다.
+        - 논리 트랜잭션은 트랜잭션 매니저를 통해 사용하는 트랜잭션을 뜻한다. 트랜잭션이 추가되는 경우에만 논리 트랜잭션을 따지는 경우가 발생한다.
+    - 왜 트랜잭션 개념을 두 개로 나눠야 할까?
+        - 트랜잭션이 중첩될 때 커밋/롤백 경우의 수가 너무 많아진다.
+        - 원칙을 세우기 위해 필요하다.
+    - 원칙
+        - 모든 논리 트랜잭션이 커밋되어야 물리 트랜잭션이 커밋된다.
+        - 하나의 논리 트랜잭션이라도 롤백되면 물리 트랜잭션은 롤백된다.
+        - All or Nothing.
+     */
+    @Test
+    void inner_commit() {
+        log.info("트랜잭션 outer 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("isNewTransaction() = {}", outer.isNewTransaction());
+
+            // 내부 트랜잭션 시작 (외부와 내부를 쉽게 파악하기 위해 인덴트 차이를 둔다)
+            log.info("트랜잭션 inner 시작");
+            TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+            log.info("isNewTransaction() = {}", inner.isNewTransaction()); // 기존 트랜잭션에 참여되기 때문에 새 트랜잭션이 아니라고 나온다
+            log.info("트랜잭션 inner 커밋 시작");
+            txManager.commit(inner); // 내부 트랜잭션은 커밋을 시도해도 커밋이 안된다.
+            log.info("트랜잭션 inner 커밋 완료");
+
+        log.info("트랜잭션 outer 커밋 시작");
+        txManager.commit(outer); // 실제로는 여기서'만' 커밋이 된다!
+        log.info("트랜잭션 outer 커밋 완료");
+
     }
 }
