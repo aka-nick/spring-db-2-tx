@@ -50,4 +50,19 @@ class MemberServiceTest {
         assertTrue(logRepository.find(username).isEmpty());
     }
 
+    /**
+     * MemberService    @Transactional:ON
+     * MemberRepository @Transactional:OFF
+     * LogRepository    @Transactional:OFF
+     */
+    // 각각의 리포지토리에 적용되어있는 별개의 트랜잭션을 묶는 가장 간단한 방법은, 두 리포지토리를 사용하는 MemberService에 트랜잭션을 적용하는 것이다.
+    @Test
+    void singleTx() {
+        String username = "singleTx";
+
+        memberService.joinV1(username); //서비스에만 트랜잭션이 있는 상태
+
+        assertTrue(memberRepository.find(username).isPresent());
+        assertTrue(logRepository.find(username).isPresent());
+    }
 }
