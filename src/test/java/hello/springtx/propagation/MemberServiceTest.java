@@ -1,5 +1,6 @@
 package hello.springtx.propagation;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,18 @@ class MemberServiceTest {
         assertTrue(logRepository.find(username).isPresent());
     }
 
+    /**
+     * MemberService    @Transactional:OFF
+     * MemberRepository @Transactional:ON
+     * LogRepository    @Transactional:ON Exception
+     */
+    @Test
+    void outerTxOff_fail() {
+        String username = "outerTxOff_fail예외";
 
+        assertThrows(RuntimeException.class, () -> memberService.joinV1(username));
+        assertTrue(memberRepository.find(username).isPresent());
+        assertTrue(logRepository.find(username).isEmpty());
+    }
 
 }
