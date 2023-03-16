@@ -121,4 +121,21 @@ class MemberServiceTest {
         // 그러면 물리 트랜잭션은 UnexpectedRollbackException을 발생시킨다.
     }
 
+    /**
+     * MemberService    @Transactional:ON
+     * MemberRepository @Transactional:ON
+     * LogRepository    @Transactional:ON(REQUIRED_NEW) Exception
+     */
+    // 로그가 실패해도 비즈니스로직은 성공할 수 있도록 로그쪽 논리 트랜잭션을 분리한다.
+    @Test
+    void recoverException_success() {
+        String username = "recoverException_success예외";
+
+        memberService.joinV2(username);
+
+        assertTrue(memberRepository.find(username).isPresent());
+        assertTrue(logRepository.find(username).isEmpty());
+        // 따로 동작하길 바라는 논리트랜잭션을 별개의 물리트랜잭션으로 분리하자, 이제야 원하는 상황대로 동작하게 되었다.
+    }
+
 }
