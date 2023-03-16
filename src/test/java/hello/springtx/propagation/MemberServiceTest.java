@@ -65,4 +65,21 @@ class MemberServiceTest {
         assertTrue(memberRepository.find(username).isPresent());
         assertTrue(logRepository.find(username).isPresent());
     }
+
+    /**
+     * MemberService    @Transactional:ON
+     * MemberRepository @Transactional:ON
+     * LogRepository    @Transactional:ON
+     */
+    @Test
+    void outerTxOn_success() {
+        String username = "outerTxOn_success";
+
+        memberService.joinV1(username); //서비스에만 트랜잭션이 있는 상태
+
+        assertTrue(memberRepository.find(username).isPresent());
+        assertTrue(logRepository.find(username).isPresent());
+    }
+
+
 }
