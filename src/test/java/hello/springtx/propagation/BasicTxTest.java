@@ -156,7 +156,7 @@ public class BasicTxTest {
 
     // 트랜잭션 전파 - 내부 롤백
     /*
-    transactionStatus 안에는 'rollback-only'라는 플래그가 있다.
+    transactionStatus 안에는 'rollback-only'라는 플래그가 있다. (TransactionStatus는 동기화 매니저 안에 있는 트랜잭션의 상태를 표현하는 객체다)
     여러 트랜잭션이 중첩되더라도 하나의 논리트랜잭션이 롤백되는 순간 공유되는 전체(물리)트랜잭션의 rollback-only 플래그는 true가 된다.
     rollback-only true의 의미는 롤백만 가능하다(커밋은 불가능하다)는 의미이다.
     이를 통해서 스프링은 All or Nothing의 커밋/롤백 전략을 수행한다.
@@ -188,6 +188,7 @@ public class BasicTxTest {
         log.info("트랜잭션 inner 시작"); // inner가 시작되면, 진행중이던 outer는 잠시 정지(suspending)해두고 inner를 진행한다.
         TransactionStatus inner = txManager.getTransaction(
                 new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRES_NEW)); // 새 트랜잭션이 필요하다고 알리는 옵션
+                // 기존 트랜잭션을 걸어두고 새 트랜잭션을 만들며 커넥션을 얻은 것이기 때문에, 커넥션이나 커넥션 안의 물리 커넥션도 별개의 객체다.
         log.info("inner is New={}", inner.isNewTransaction());
         log.info("트랜잭션 inner 롤백 시작");
         txManager.rollback(inner); // 별개의 트랜잭션이기 때문에 안쪽에서는 롤백이 일어난다.
@@ -198,5 +199,7 @@ public class BasicTxTest {
         txManager.commit(outer); // outer에서 inner에서 롤백이 일어나도 outer에서 UnexpectedRollbackException이 발생하지 않는다
                                     // (현재 경우 이름만 outer/inner일뿐, 별개의 트랜잭션이기 때문)
         log.info("트랜잭션 outer 커밋 완료");
+
+        // 커넥션이 빠르게 고갈될 수 있기 떄문에 성능에 민감할 때는 유의해서 사용해야 한다.
     }
 }
