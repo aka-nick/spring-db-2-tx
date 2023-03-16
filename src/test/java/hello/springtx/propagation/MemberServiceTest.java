@@ -127,6 +127,8 @@ class MemberServiceTest {
      * LogRepository    @Transactional:ON(REQUIRED_NEW) Exception
      */
     // 로그가 실패해도 비즈니스로직은 성공할 수 있도록 로그쪽 논리 트랜잭션을 분리한다.
+    // rollbackOnly 체크를 해도 물리트랜잭션이 분리되었으니 전체 롤백이 될 일이 사라지고,
+    // 물리트랜잭션을 시작한 쪽의 로직에서 런타임예외를 잡기까지 했으니 예외 발생 없이 비즈니스 로직이 잘 수행된다.
     @Test
     void recoverException_success() {
         String username = "recoverException_success예외";
