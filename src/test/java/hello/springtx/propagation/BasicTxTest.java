@@ -2,6 +2,7 @@ package hello.springtx.propagation;
 
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 @Slf4j
@@ -170,7 +172,8 @@ public class BasicTxTest {
         log.info("트랜잭션 inner 롤백 완료");
 
         log.info("트랜잭션 outer 커밋 시작");
-        txManager.commit(outer);
+        Assertions.assertThatThrownBy(() -> txManager.commit(outer))
+                .isInstanceOf(UnexpectedRollbackException.class);
         log.info("트랜잭션 outer 커밋 완료");
     }
 }
