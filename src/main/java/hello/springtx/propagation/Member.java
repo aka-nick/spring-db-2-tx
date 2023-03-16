@@ -16,11 +16,9 @@ public class Member {
     private String username;
 
     public Member() {
-
     }
 
-    public Member(Long id, String username) {
-        this.id = id;
+    public Member(String username) {
         this.username = username;
     }
 }
