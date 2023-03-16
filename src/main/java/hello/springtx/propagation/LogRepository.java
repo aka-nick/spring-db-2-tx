@@ -1,5 +1,6 @@
 package hello.springtx.propagation;
 
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,4 +25,9 @@ public class LogRepository {
         }
     }
 
+    public Optional<Log> find(String message) {
+        return em.createQuery("select l from Log l where l.message = :message", Log.class)
+                .setParameter("message", message)
+                .getResultList().stream().findAny();
+    }
 }
