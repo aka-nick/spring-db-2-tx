@@ -132,6 +132,45 @@ public class BasicTxTest {
         log.info("트랜잭션 outer 커밋 시작");
         txManager.commit(outer); // 실제로는 여기서'만' 커밋이 된다!
         log.info("트랜잭션 outer 커밋 완료");
+    }
 
+    // 트랜잭션 전파 - 외부 롤백
+    @Test
+    void outer_rollback() {
+        log.info("트랜잭션 outer 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+
+        log.info("트랜잭션 inner 시작");
+        TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("트랜잭션 inner 커밋 시작");
+        txManager.commit(inner);
+        log.info("트랜잭션 inner 커밋 완료");
+
+        log.info("트랜잭션 outer 롤백 시작");
+        txManager.rollback(outer);
+        log.info("트랜잭션 outer 롤백 완료");
+    }
+
+    // 트랜잭션 전파 - 내부 롤백
+    /*
+    transactionStatus 안에는 'rollback-only'라는 플래그가 있다.
+    여러 트랜잭션이 중첩되더라도 하나의 논리트랜잭션이 롤백되는 순간 공유되는 전체(물리)트랜잭션의 rollback-only 플래그는 true가 된다.
+    rollback-only true의 의미는 롤백만 가능하다(커밋은 불가능하다)는 의미이다.
+    이를 통해서 스프링은 All or Nothing의 커밋/롤백 전략을 수행한다.
+     */
+    @Test
+    void inner_rollback() {
+        log.info("트랜잭션 outer 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+
+        log.info("트랜잭션 inner 시작");
+        TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("트랜잭션 inner 롤백 시작");
+        txManager.rollback(inner);
+        log.info("트랜잭션 inner 롤백 완료");
+
+        log.info("트랜잭션 outer 커밋 시작");
+        txManager.commit(outer);
+        log.info("트랜잭션 outer 커밋 완료");
     }
 }
