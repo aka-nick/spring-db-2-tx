@@ -28,6 +28,7 @@ public class MemberService {
     }
 
     // 로그 저장 중 예외가 발생했을 때 회원 가입에 영향을 주지 않도록, 로그에서 발생하는 예외는 잡기로 하는 시나리오
+    @Transactional
     public void joinV2(String username) {
         Member member = new Member(username);
         Log logMessage = new Log(username);
